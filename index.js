@@ -32,7 +32,7 @@ const unsplash = createApi({
 });
 
 const app = express();
-const port = 3000;
+const port = 8080;
 const saltRounds = 10;
 
 const db = new pg.Client({
