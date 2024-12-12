@@ -1,4 +1,4 @@
-# Blog.ai - AI-Powered Blog Website
+# BlogAI - AI-Powered Blog Website
 
 ## Overview
 AI-Powered Blog Generator is a cutting-edge application designed to simplify blog creation. Powered by advanced natural language processing, this tool can generate creative, informative, and engaging articles based on your chosen topics and keywords.
