@@ -42,7 +42,7 @@ router.post("/writeblog", ensureAuthenticated, async (req, res) => {
         "INSERT INTO blog (title, content, image, author, category, date, UserId) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
         [title, content, imageURL, req.user.username, category, currentDate, userId]
       );
-  
+
       // Delete the previous blog if exists
       if (previousBlogId) {      
         // Then, delete the blog entry
@@ -51,7 +51,7 @@ router.post("/writeblog", ensureAuthenticated, async (req, res) => {
           throw new Error("Previous blog not found or not deleted.");
         }
       }
-  
+
       res.redirect("/profile/blogs");
     } catch (error) {
       console.error("Error saving blog:", error);
@@ -78,10 +78,10 @@ router.post("/draftblog", ensureAuthenticated, async (req, res) => {
         "INSERT INTO draft (title, content, image, author, category, date, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
         [title, content, imageURL, req.user.username, category, currentDate, userId]
       );
-  
+
       // Delete the draft from drafts table
       await db.query("DELETE FROM draft WHERE id = $1", [req.body.previousBlogId]);
-  
+
       res.redirect("/profile/drafts");
     } catch (error) {
       console.error("Error saving draft:", error);
