@@ -1,11 +1,10 @@
 // File: /routes/blogRoutes.js
 
 import express from 'express';
-import { retext } from 'retext';
-import retextSpell from 'retext-spell';
 import { ensureAuthenticated } from '../middlewares/authMiddleware.js';
 import { generateBlog } from '../services/googleAIService.js';
 import { fetchImageURL } from '../services/unsplashService.js';
+import {correctText} from '../services/textCorrectionService.js';
 import db from '../services/dbClient.js';
 
 const router = express.Router();
@@ -22,25 +21,6 @@ router.post("/generateblog", ensureAuthenticated, async (req, res) => {
       res.status(500).json({ error: "Failed to generate blog content" });
     }
 });
-
-// Function to correct misspelled words
-async function correctText(inputText) {
-  const file = await retext()
-  .use(retextSpell, {dictionary: dictionaryEn})
-  .process(inputText)
-
-  let correctedText = inputText;
-  file.messages.forEach(message => {
-    const { actual, expected } = message;
-    if (expected && expected.length > 0) {
-      const suggestion = expected[0]; // take the first suggestion
-      const regex = new RegExp(`\\b${actual}\\b`, 'g');
-      correctedText = correctedText.replace(regex, suggestion);
-    }
-  });
-
-  return correctedText;
-}
 
 // Route to handle form submission and correct text
 router.post("/writeblog", ensureAuthenticated, async (req, res) => {
