@@ -1,11 +1,12 @@
 import { retext } from 'retext';
 import retextSpell from 'retext-spell';
-import dictionaryEn from 'dictionary-en';
+import { english as dictionaryEn } from 'dictionary-en';
 
 export const correctText = async (inputText) => {
     try {
+        const dictionary = await dictionaryEn();  // Load the dictionary
         const file = await retext()
-            .use(retextSpell, { dictionary: dictionaryEn })
+            .use(retextSpell, { dictionary })
             .process(inputText);
 
         let correctedText = inputText;
