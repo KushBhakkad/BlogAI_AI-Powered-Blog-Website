@@ -1,12 +1,20 @@
 import { retext } from 'retext';
 import retextSpell from 'retext-spell';
-import { english as dictionaryEn } from 'dictionary-en';
+import dictionary from 'dictionary-en';
 
 export const correctText = async (inputText) => {
     try {
-        const dictionary = await dictionaryEn();  // Load the dictionary
+        // Load dictionary asynchronously
+        const dictionaryEn = await new Promise((resolve, reject) => {
+            dictionary((err, dict) => {
+                if (err) reject(err);
+                else resolve(dict);
+            });
+        });
+
+        // Apply spelling correction
         const file = await retext()
-            .use(retextSpell, { dictionary })
+            .use(retextSpell, { dictionary: dictionaryEn })
             .process(inputText);
 
         let correctedText = inputText;
