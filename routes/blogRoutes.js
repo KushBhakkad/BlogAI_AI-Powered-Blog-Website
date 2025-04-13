@@ -9,17 +9,14 @@ import db from '../services/dbClient.js';
 
 const router = express.Router();
 
-// Route to handle blog generation
 router.post("/generateblog", ensureAuthenticated, async (req, res) => {
-    try {
-      const { title, category } = req.body;
-      console.log("Generating blog for:", { title, category }); // Debug statement
-      const content = await generateBlog(title, category);
-      console.log("Generated content:", content); // Debug statement
-      res.json({ content });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to generate blog content" });
-    }
+  try {
+    const { title, category } = req.body;
+    const content = await generateBlog(title, category);
+    res.json({ content });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to generate blog content" });
+  }
 });
 
 // Route to handle form submission and correct text

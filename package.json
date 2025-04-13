@@ -11,7 +11,9 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "@google/genai": "^0.8.0",
         "@google/generative-ai": "^0.2.1",
+        "@neondatabase/serverless": "^1.0.0",
         "axios": "^1.6.7",
         "bcrypt": "^5.1.1",
         "body-parser": "^1.20.2",
@@ -34,6 +36,7 @@
         "retext": "^9.0.0",
         "retext-english": "^5.0.0",
         "retext-spell": "^6.1.0",
+        "secrets-sniffer": "^1.0.3",
         "stopword": "^3.0.1",
         "textgears-api": "^1.1.11",
         "translate": "^3.0.0",
