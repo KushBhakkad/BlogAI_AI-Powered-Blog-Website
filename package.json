@@ -27,11 +27,12 @@
         "express-session": "^1.18.0",
         "fs": "^0.0.1-security",
         "image-js": "^0.35.5",
+        "node-fetch": "^3.3.2",
         "openai": "^4.28.0",
         "passport": "^0.7.0",
         "passport-google-oauth2": "^0.2.0",
         "passport-local": "^1.0.0",
-        "pg": "^8.12.0",
+        "pg": "^8.14.1",
         "python-shell": "^5.0.0",
         "retext": "^9.0.0",
         "retext-english": "^5.0.0",
@@ -42,6 +43,7 @@
         "translate": "^3.0.0",
         "unified": "^11.0.4",
         "unsplash-js": "^7.0.19",
-        "vfile-reporter": "^8.1.1"
+        "vfile-reporter": "^8.1.1",
+        "ws": "^8.18.1"
     }
 }
