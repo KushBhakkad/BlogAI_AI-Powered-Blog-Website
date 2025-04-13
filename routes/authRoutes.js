@@ -9,11 +9,30 @@ const router = express.Router();
 
 const saltRounds = 10;
 
-router.get('/login', (req, res) => res.render('login.ejs'));
-router.post('/login', passport.authenticate('local', {
-    successRedirect: '/',
-    failureRedirect: '/subscribe',
-}));
+router.get('/login', (req, res) => res.render('login.ejs', { error: null }));
+router.post('/login', (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) {
+      console.error("Passport error:", err);
+      return res.redirect("/login");
+    }
+    if (!user) {
+      // info.message comes from passportConfig.js
+      if (info && info.message === "User not found") {
+        return res.redirect("/subscribe");
+      } else {
+        return res.render("login.ejs", { error: "Incorrect password. Try again." });
+      }
+    }
+    req.login(user, (err) => {
+      if (err) {
+        console.error("Login error:", err);
+        return res.redirect("/login");
+      }
+      return res.redirect("/");
+    });
+  })(req, res, next);
+});
 
 router.get("/subscribe", (req, res) => res.render("subscribe.ejs"));
 router.post("/subscribe", async (req, res) => {
