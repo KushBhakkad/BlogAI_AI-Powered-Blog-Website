@@ -4,6 +4,7 @@ import express from 'express';
 import { ensureAuthenticated } from '../middlewares/authMiddleware.js';
 import { generateBlog } from '../services/googleAIService.js';
 import { fetchImageURL } from '../services/unsplashService.js';
+import { fetchGoogleImage } from '../services/googleCSEService.js';
 import {correctText} from '../services/textCorrectionService.js';
 import db from '../services/dbClient.js';
 
@@ -21,69 +22,77 @@ router.post("/generateblog", ensureAuthenticated, async (req, res) => {
 
 // Route to handle form submission and correct text
 router.post("/writeblog", ensureAuthenticated, async (req, res) => {
-    try {
-      let { title, content, query, category, previousBlogId } = req.body;
-      const userId = req.user.id;
-  
-      // Correct the content
+  try {
+    let { title, content, query, category, previousBlogId, skipCorrection, useUnsplash } = req.body;
+    const userId = req.user.id;
+    skipCorrection = skipCorrection === "true";
+
+    if (!skipCorrection) {
       content = await correctText(content);
-      // content = await checkGrammar(content);
-  
-      // Fetch image URL asynchronously
-      const imageURL = await fetchImageURL(query);
-  
-      const currentDate = new Date(); // Get current date and time
-  
-      // Insert new blog into database
-      const newBlog = await db.query(
-        "INSERT INTO blog (title, content, image, author, category, date, UserId) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
-        [title, content, imageURL, req.user.username, category, currentDate, userId]
-      );
-
-      // Delete the previous blog if exists
-      if (previousBlogId) {      
-        // Then, delete the blog entry
-        const deleteResult = await db.query("DELETE FROM blog WHERE id = $1", [previousBlogId]);
-        if (deleteResult.rowCount === 0) {
-          throw new Error("Previous blog not found or not deleted.");
-        }
-      }
-
-      res.redirect("/profile/blogs");
-    } catch (error) {
-      console.error("Error saving blog:", error);
-      res.status(500).send("An error occurred while saving the blog.");
     }
+
+    // decide source based on checkbox
+    let imageURL;
+    if (useUnsplash) {
+      imageURL = await fetchImageURL(query);       // your Unsplash wrapper
+    } else {
+      imageURL = await fetchGoogleImage(query);    // your Google CSE wrapper
+    }
+
+    const currentDate = new Date();
+    const newBlog = await db.query(
+      `INSERT INTO blog
+         (title, content, image, author, category, date, UserId)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)
+       RETURNING *`,
+      [title, content, imageURL, req.user.username, category, currentDate, userId]
+    );
+
+    if (previousBlogId) {
+      await db.query("DELETE FROM blog WHERE id = $1", [previousBlogId]);
+    }
+
+    res.redirect("/profile/blogs");
+  } catch (error) {
+    console.error("Error saving blog:", error);
+    res.status(500).send("An error occurred while saving the blog.");
+  }
 });
   
 router.post("/draftblog", ensureAuthenticated, async (req, res) => {
-    try {
-      let { title, content, query, category } = req.body;
-      const userId = req.user.id;
-  
-      // Correct the content
+  try {
+    let { title, content, query, category, skipCorrection, previousBlogId, useUnsplash } = req.body;
+    const userId = req.user.id;
+    skipCorrection = skipCorrection === "true";
+
+    if (!skipCorrection) {
       content = await correctText(content);
-      // content = await checkGrammar(content);
-  
-      // Fetch image URL asynchronously
-      const imageURL = await fetchImageURL(query);
-  
-      const currentDate = new Date(); // Get current date and time
-  
-      // Insert new blog into database
-      await db.query(
-        "INSERT INTO draft (title, content, image, author, category, date, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
-        [title, content, imageURL, req.user.username, category, currentDate, userId]
-      );
-
-      // Delete the draft from drafts table
-      await db.query("DELETE FROM draft WHERE id = $1", [req.body.previousBlogId]);
-
-      res.redirect("/profile/drafts");
-    } catch (error) {
-      console.error("Error saving draft:", error);
-      res.status(500).send("An error occurred while saving the draft.");
     }
+
+    let imageURL;
+    if (useUnsplash) {
+      imageURL = await fetchImageURL(query);
+    } else {
+      imageURL = await fetchGoogleImage(query);
+    }
+
+    const currentDate = new Date();
+    await db.query(
+      `INSERT INTO draft
+         (title, content, image, author, category, date, user_id)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+      [title, content, imageURL, req.user.username, category, currentDate, userId]
+    );
+
+    if (previousBlogId) {
+      await db.query("DELETE FROM draft WHERE id = $1", [previousBlogId]);
+    }
+
+    res.redirect("/profile/drafts");
+  } catch (error) {
+    console.error("Error saving draft:", error);
+    res.status(500).send("An error occurred while saving the draft.");
+  }
 });
 
 router.get("/completedraft", ensureAuthenticated, async (req, res) => {

@@ -154,7 +154,27 @@
     .content {
       flex-grow: 1;
     }
-    
+
+      /* Custom checkbox styling */
+  .form-check-input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: white;
+    border: 2px solid black;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    position: relative;
+    outline: none;
+    box-shadow: none;
+  }
+
+  .form-check-input[type="checkbox"]:checked {
+    background-color: black;
+    border-color: black;
+    outline: none;
+    box-shadow: none;
+  }    
     </style>
 
     <script>
@@ -419,11 +439,23 @@
                       <p class="lead my-3"><%= new Date().toLocaleDateString() %> by <%= user.username %></p>
                       
                       <!-- Image Selection -->
-                      <div class="text-center mb-3">
-                        <div class="mt-3">
-                          <input name="query" type="text" class="form-control border-0 text-center" placeholder="Add a single word about the image you want" style="height: 60px; font-size: 20px; display: inline-block;" required>
+                      <div class="text-center my-4">
+                        <div class="d-flex justify-content-center align-items-center gap-4">
+                          <!-- Input Field -->
+                          <input name="query" type="text" class="form-control text-center border-0" 
+                                placeholder="Add a single word about the image you want" 
+                                style="height: 60px; font-size: 20px; width: 77.5%;" required>
+                          
+                          <!-- Tick Checkbox -->
+                          <div class="form-check d-flex align-items-center m-0" style="color: black;">
+                            <input class="form-check-input" type="checkbox" id="generateImageCheckbox"
+                              name="useUnsplash"
+                              style="width: 20px; height: 20px; border: 2px solid black;">
+                            <label class="form-check-label ms-2" for="generateImageCheckbox" style="font-size: 20px;">Generate Image</label>
+                          </div>
                         </div>
                       </div>
+                      
                       <div class="mb-5">
                         <input name="category" class="form-control border-0 text-center" style="height: 60px; display: inline-block; font-size: 20px;" list="datalistOptions" id="exampleDataList" placeholder="Select the niche of your blog..." required>
                         <datalist id="datalistOptions">
@@ -441,6 +473,8 @@
                           <option value="Travel">
                         </datalist>
                       </div>
+
+                      <input type="hidden" name="skipCorrection" id="skipCorrection" value="false">
                       
                       <!-- Blog Content -->
                       <div class="form-group text-center">
@@ -480,31 +514,35 @@
       console.log("Document is ready"); // Debug statement
   
       $('#generateBlogButton').click(function () {
-          console.log("Generate Blog button clicked"); // Debug statement
-  
-          let content = $('#content').val();
-          let title = $('input[name="title"]').val();
-          let category = $('input[name="category"]').val();
-  
-          console.log("Data to be sent:", { content, title, category }); // Debug statement
-  
-          $.ajax({
-              url: '/generateblog',
-              type: 'POST',
-              data: { title, category },
-              success: function (response) {
-                  console.log("Response from server:", response); // Debug statement
-                  if (response.content) {
-                      $('#content').val(response.content);
-                  } else {
-                      console.error('No content in response');
-                  }
-              },
-              error: function (error) {
-                  console.error('Error generating blog content:', error);
-              }
-          });
-      });
+        console.log("Generate Blog button clicked");
+
+        let title = $('input[name="title"]').val();
+        let category = $('input[name="category"]').val();
+
+        $.ajax({
+            url: '/generateblog',
+            type: 'POST',
+            data: { title, category },
+            success: function (response) {
+                console.log("Response from server:", response);
+                if (response.content) {
+                    $('#content').val(response.content);
+                    // Set the hidden field to true since this is AI-generated
+                    $('#skipCorrection').val("true");
+                } else {
+                    console.error('No content in response');
+                }
+            },
+            error: function (error) {
+                console.error('Error generating blog content:', error);
+            }
+        });
+    });
+
+    // Reset skipCorrection if user modifies the content manually
+    $('#content').on('input', function() {
+        $('#skipCorrection').val("false");
+    });
   });
   </script>
   

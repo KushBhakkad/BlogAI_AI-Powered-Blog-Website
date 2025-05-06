@@ -154,6 +154,27 @@
     .content {
       flex-grow: 1;
     }
+
+  /* Custom checkbox styling */
+  .form-check-input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: white;
+    border: 2px solid black;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    position: relative;
+    outline: none;
+    box-shadow: none;
+  }
+
+  .form-check-input[type="checkbox"]:checked {
+    background-color: black;
+    border-color: black;
+    outline: none;
+    box-shadow: none;
+  }   
     </style>
 
     <script>
@@ -417,12 +438,21 @@
                               <p class="lead my-3"><%= new Date().toLocaleDateString() %> by <%= user.username %></p>
       
                               <!-- Image Selection -->
-                              <div class="text-center mb-3">
-                                  <div class="mt-3">
-                                      <input name="query" type="text" class="form-control border-0 text-center" 
-                                             value="<%= blog ? blog.query : '' %>" 
-                                             placeholder="Add a single word about the image you want" style="height: 60px; font-size: 20px; display: inline-block;" required>
+                              <div class="text-center my-4">
+                                <div class="d-flex justify-content-center align-items-center gap-4">
+                                  <!-- Input Field -->
+                                  <input name="query" type="text" class="form-control text-center border-0" 
+                                        placeholder="Add a single word about the image you want" 
+                                        style="height: 60px; font-size: 20px; width: 77.5%;" required>
+                                  
+                                  <!-- Tick Checkbox -->
+                                  <div class="form-check d-flex align-items-center m-0" style="color: black;">
+                                    <input class="form-check-input" type="checkbox" id="generateImageCheckbox"
+                                      name="useUnsplash"
+                                      style="width: 20px; height: 20px; border: 2px solid black;">
+                                    <label class="form-check-label ms-2" for="generateImageCheckbox" style="font-size: 20px;">Generate Image</label>
                                   </div>
+                                </div>
                               </div>
       
                               <div class="mb-5">
@@ -454,6 +484,7 @@
                               <!-- Previous Blog ID -->
                               <input type="hidden" name="previousBlogId" value="<%= blog.id %>">
 
+                              <input type="hidden" name="skipCorrection" id="skipCorrection" value="false">
 
                               <div class="text-center mt-4" style="font-size: 50px;">
                                   <button type="button" class="btn btn-dark" onclick="submitForm('/writeblog')">Post the Blog</button>
@@ -481,6 +512,12 @@
           document.getElementById('blogForm').action = action;
           document.getElementById('blogForm').submit();
       }
+    </script>
+    <script>
+        // Reset skipCorrection if user modifies the content manually
+        document.querySelector('textarea[name="content"]').addEventListener('input', function() {
+            document.getElementById('skipCorrection').val = "false";
+        });
     </script>
 
     <script src="/docs/5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
